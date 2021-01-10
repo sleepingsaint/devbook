@@ -8,9 +8,14 @@ class BookmarkedArticles extends StatefulWidget {
   _BookmarkedArticlesState createState() => _BookmarkedArticlesState();
 }
 
-class _BookmarkedArticlesState extends State<BookmarkedArticles> {
+class _BookmarkedArticlesState extends State<BookmarkedArticles>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: ValueListenableBuilder(
         valueListenable: Hive.box("bookmarkedArticles").listenable(),

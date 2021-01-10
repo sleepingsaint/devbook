@@ -11,8 +11,12 @@ class ArticlesList extends StatefulWidget {
   _ArticlesListState createState() => _ArticlesListState();
 }
 
-class _ArticlesListState extends State<ArticlesList> {
+class _ArticlesListState extends State<ArticlesList>
+    with AutomaticKeepAliveClientMixin {
   final _pageController = PagingController<int, Article>(firstPageKey: 0);
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -22,22 +26,24 @@ class _ArticlesListState extends State<ArticlesList> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () => Future.sync(() => _pageController.refresh()),
-      child: PagedListView.separated(
-        pagingController: _pageController,
-        separatorBuilder: (context, index) => SizedBox(height: 4.0),
-        builderDelegate: PagedChildBuilderDelegate<Article>(
-          itemBuilder: (context, article, index) => ArticleCard(
-            article: article,
+    super.build(context);
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: () => Future.sync(() => _pageController.refresh()),
+        child: PagedListView.separated(
+          pagingController: _pageController,
+          separatorBuilder: (context, index) => SizedBox(height: 4.0),
+          builderDelegate: PagedChildBuilderDelegate<Article>(
+            itemBuilder: (context, article, index) => ArticleCard(
+              article: article,
+            ),
+            noItemsFoundIndicatorBuilder: (context) => Center(
+              child: Text("No articles found"),
+            ),
+            firstPageErrorIndicatorBuilder: (context) => Center(
+              child: Text("First Page Error ${_pageController.error}"),
+            ),
           ),
-          noItemsFoundIndicatorBuilder: (context) => Center(
-            child: Text("No articles found"),
-          ),
-          firstPageErrorIndicatorBuilder: (context) => Center(
-            child: Text("First Page Error ${_pageController.error}"),
-          ),
-          // newPageErrorIndicatorBuilder:
         ),
       ),
     );
@@ -59,6 +65,11 @@ class _ArticlesListState extends State<ArticlesList> {
       return Article.getArticles(jsonDecode(resp.body));
     }
     return [];
-    // throw Exception("Unable to retrieve articles");
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 }

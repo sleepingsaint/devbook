@@ -7,6 +7,7 @@ import 'package:devbook/screens/SearchArticlesList.dart';
 import 'package:devbook/screens/ArticlesList.dart';
 import 'package:devbook/screens/BookmarkedArticles.dart';
 import 'package:devbook/screens/About.dart';
+import 'package:devbook/config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,7 @@ void main() async {
   Hive.init(appDocumentDir.path);
   Hive.registerAdapter(ArticleAdapter());
   await Hive.openBox("bookmarkedArticles");
+  await Hive.openBox("settings");
   runApp(DevBook());
 }
 
@@ -24,6 +26,7 @@ class DevBook extends StatefulWidget {
 
 class _DevBookState extends State<DevBook> {
   int _selectedIndex = 0;
+  PageController _pageController;
 
   static List<Widget> _screens = [
     ArticlesList(),
@@ -33,17 +36,28 @@ class _DevBookState extends State<DevBook> {
   ];
 
   @override
+  void initState() {
+    _pageController = PageController();
+    theme.addListener(() {
+      setState(() {});
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: theme.currentTheme(),
       home: Scaffold(
-        appBar: _selectedIndex == 1
-            ? null
-            : AppBar(
-                title: Text("DevBook"),
-              ),
-        body: _screens.elementAt(_selectedIndex),
+        appBar: AppBar(title: Text("DevBook")),
+        body: PageView(
+          controller: _pageController,
+          children: _screens,
+          onPageChanged: (index) => setState(() => {_selectedIndex = index}),
+        ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           items: const <BottomNavigationBarItem>[
@@ -65,9 +79,12 @@ class _DevBookState extends State<DevBook> {
             ),
           ],
           currentIndex: _selectedIndex,
-          onTap: (index) => setState(() {
-            _selectedIndex = index;
-          }),
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+            _pageController.jumpToPage(index);
+          },
         ),
       ),
     );
@@ -77,5 +94,7 @@ class _DevBookState extends State<DevBook> {
   void dispose() {
     super.dispose();
     Hive.close();
+    _pageController.dispose();
+    // theme.removeListener(() { })
   }
 }
