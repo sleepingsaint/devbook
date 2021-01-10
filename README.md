@@ -1,16 +1,9 @@
 # devbook
+:notebook_with_decorative_cover: 	ledger Encyclopedia for developers
 
-A new Flutter project.
+:hammer_and_wrench: Made using __Flutter__
 
-## Getting Started
+:bulb: Inspired from facebook feed
 
-This project is a starting point for a Flutter application.
+:star: All the posts are created using __dev.to__ api
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
