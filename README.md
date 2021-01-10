@@ -1,7 +1,7 @@
 # devbook
-:notebook_with_decorative_cover: 	ledger Encyclopedia for developers
+:notebook_with_decorative_cover: Encyclopedia for developers
 
-:hammer_and_wrench: Made using __Flutter__
+:hammer_and_wrench: Made with :heart: and __Flutter__ 
 
 :bulb: Inspired from facebook feed
 
