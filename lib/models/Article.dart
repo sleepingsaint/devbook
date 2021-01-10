@@ -20,7 +20,7 @@ class Article {
   final String socialImgUrl;
 
   @HiveField(5)
-  final List<String> tags;
+  final List tags;
 
   Article(
       {this.id,
@@ -37,7 +37,7 @@ class Article {
         description: data["description"],
         url: data["url"],
         socialImgUrl: data["social_image"],
-        tags: data["tags_list"]);
+        tags: data["tag_list"]);
   }
 
   static List<Article> getArticles(List<dynamic> data) {

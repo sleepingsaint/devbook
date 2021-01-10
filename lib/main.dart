@@ -36,8 +36,13 @@ class _DevBookState extends State<DevBook> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
       home: Scaffold(
-        appBar: _selectedIndex == 1 ? null : AppBar(title: Text("DevBook")),
+        appBar: _selectedIndex == 1
+            ? null
+            : AppBar(
+                title: Text("DevBook"),
+              ),
         body: _screens.elementAt(_selectedIndex),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,

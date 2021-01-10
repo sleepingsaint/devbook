@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:devbook/models/Article.dart';
@@ -12,136 +12,53 @@ class ArticlesList extends StatefulWidget {
 }
 
 class _ArticlesListState extends State<ArticlesList> {
-  Future<List<Article>> articles;
-  ScrollController _scrollController;
-
-  int _page = 0;
-  bool _showFab = false;
-
-  _scrollListener() {
-    if (_scrollController.position.userScrollDirection ==
-            ScrollDirection.reverse &&
-        _showFab) {
-      setState(() {
-        _showFab = false;
-      });
-    } else if ((_scrollController.position.atEdge ||
-            _scrollController.position.userScrollDirection ==
-                ScrollDirection.forward) &&
-        !_showFab) {
-      setState(() {
-        _showFab = true;
-      });
-    }
-  }
+  final _pageController = PagingController<int, Article>(firstPageKey: 0);
 
   @override
   void initState() {
+    _pageController.addPageRequestListener((pageKey) => _fetchPage(pageKey));
     super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
-    articles = this._getArticles(page: this._page);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Center(
-          child: FutureBuilder<List<Article>>(
-            future: articles,
-            builder: (BuildContext context, snapshot) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: snapshot.data.length,
-                    itemBuilder: (context, index) => ArticleCard(
-                          article: snapshot.data[index],
-                        ));
-              } else if (snapshot.hasError) {
-                return Text("${snapshot.error}");
-              }
-              return CircularProgressIndicator();
-            },
+    return RefreshIndicator(
+      onRefresh: () => Future.sync(() => _pageController.refresh()),
+      child: PagedListView.separated(
+        pagingController: _pageController,
+        separatorBuilder: (context, index) => SizedBox(height: 4.0),
+        builderDelegate: PagedChildBuilderDelegate<Article>(
+          itemBuilder: (context, article, index) => ArticleCard(
+            article: article,
           ),
+          noItemsFoundIndicatorBuilder: (context) => Center(
+            child: Text("No articles found"),
+          ),
+          firstPageErrorIndicatorBuilder: (context) => Center(
+            child: Text("First Page Error ${_pageController.error}"),
+          ),
+          // newPageErrorIndicatorBuilder:
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: Visibility(
-          visible: _showFab,
-          child: Container(
-            margin: EdgeInsets.only(bottom: 8.0),
-            decoration: BoxDecoration(
-                color: Colors.deepPurpleAccent,
-                borderRadius: BorderRadius.circular(25.0)),
-            // padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: FlatButton(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.navigate_before,
-                          color: this._page == 0 ? Colors.black : Colors.white,
-                        ),
-                        Text(
-                          "Prev",
-                          style: TextStyle(
-                              color: this._page == 0
-                                  ? Colors.black
-                                  : Colors.white),
-                        )
-                      ],
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (this._page != 0) {
-                          this._page--;
-                          this.articles = this._getArticles(page: this._page);
-                        }
-                      });
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: FlatButton(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Next",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        Icon(
-                          Icons.navigate_next,
-                          color: Colors.white,
-                        )
-                      ],
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        this._page++;
-                        this.articles = this._getArticles(page: this._page);
-                      });
-                    },
-                  ),
-                )
-              ],
-            ),
-          ),
-        ));
+      ),
+    );
   }
 
-  Future<List<Article>> _getArticles({int page = 1}) async {
-    final resp = await http.get("https://dev.to/api/articles?page=$page");
+  Future<void> _fetchPage(int pageKey) async {
+    try {
+      final newArticles = await _getArticles(pageKey);
+      final nextPageKey = pageKey + 1;
+      _pageController.appendPage(newArticles, nextPageKey);
+    } catch (error) {
+      _pageController.error = error;
+    }
+  }
+
+  Future<List<Article>> _getArticles(int pageKey) async {
+    final resp = await http.get("https://dev.to/api/articles?page=$pageKey");
     if (resp.statusCode == 200) {
       return Article.getArticles(jsonDecode(resp.body));
-    } else {
-      throw Exception("Failed to load articles");
     }
+    return [];
+    // throw Exception("Unable to retrieve articles");
   }
 }
