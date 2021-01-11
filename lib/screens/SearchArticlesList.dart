@@ -5,6 +5,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 import 'package:devbook/models/SearchArticle.dart';
 import 'package:devbook/screens/components/SearchArticleCard.dart';
+import 'package:lottie/lottie.dart';
 
 class SearchArticlesList extends StatefulWidget {
   @override
@@ -73,16 +74,20 @@ class _SearchArticlesListState extends State<SearchArticlesList>
                           article: article,
                         ),
                         noItemsFoundIndicatorBuilder: (context) => Center(
-                          child: Text("No Articles Found"),
+                          child: Text("No Articles Found for $_searchInput."),
                         ),
-                        firstPageErrorIndicatorBuilder: (context) => Center(
-                          child: Text("error ${_pageController.error}"),
-                        ),
-                        // newPageErrorIndicatorBuilder:
+                        newPageProgressIndicatorBuilder: (context) =>
+                            Lottie.asset("assets/lottie/cube.json"),
                       ),
                     ),
                   )
-                : SizedBox(),
+                : Expanded(
+                    child: ListView(
+                      children: [
+                        Lottie.asset("assets/lottie/searching.json"),
+                      ],
+                    ),
+                  ),
           ],
         ),
       ),

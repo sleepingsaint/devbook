@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:devbook/models/Article.dart';
 import 'package:devbook/screens/components/ArticleCard.dart';
+import 'package:lottie/lottie.dart';
 
 class ArticlesList extends StatefulWidget {
   @override
@@ -40,9 +41,8 @@ class _ArticlesListState extends State<ArticlesList>
             noItemsFoundIndicatorBuilder: (context) => Center(
               child: Text("No articles found"),
             ),
-            firstPageErrorIndicatorBuilder: (context) => Center(
-              child: Text("First Page Error ${_pageController.error}"),
-            ),
+            newPageProgressIndicatorBuilder: (context) =>
+                Lottie.asset("assets/lottie/cube.json"),
           ),
         ),
       ),
