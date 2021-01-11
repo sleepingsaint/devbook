@@ -39,7 +39,6 @@ class _SearchArticlesListState extends State<SearchArticlesList>
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: TextField(
-                // textInputAction: TextInputAction.go,
                 onSubmitted: (val) {
                   setState(() {
                     _searchInput = _searchController.text;

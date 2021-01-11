@@ -46,8 +46,8 @@ class _SearchArticleWebViewState extends State<SearchArticleWebView> {
                     this.isBookMarked = false;
                   });
                 } else {
-                  _bookmarkedArticlesBox.put(this.widget.article.id,
-                      await _getArticle(this.widget.article.id));
+                  Article article = await _getArticle(this.widget.article.id);
+                  _bookmarkedArticlesBox.put(this.widget.article.id, article);
                   setState(() {
                     this.isBookMarked = true;
                   });
@@ -71,7 +71,9 @@ class _SearchArticleWebViewState extends State<SearchArticleWebView> {
     final resp = await http.get("https://dev.to/api/articles/$id");
 
     if (resp.statusCode == 200) {
-      return Article.fromJSON(jsonDecode(resp.body));
+      Map<String, dynamic> data = jsonDecode(resp.body);
+      data["tag_list"] = data["tag_list"].split(", ");
+      return Article.fromJSON(data);
     }
 
     throw Exception("Unable to retrive article");
